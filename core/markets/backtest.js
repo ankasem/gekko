@@ -4,13 +4,21 @@ var config = util.getConfig();
 var dirs = util.dirs();
 var log = require(dirs.core + 'log');
 var moment = require('moment');
+var juration = require('juration');
 
 var adapter = config[config.adapter];
 var Reader = require(dirs.gekko + adapter.path + '/reader');
 var daterange = config.backtest.daterange;
 
-var to = moment.utc(daterange.to);
-var from = moment.utc(daterange.from);
+if(_.isString(daterange)) {
+  var delta = juration.parse(daterange);
+  var from = moment().utc().subtract(delta, 'seconds');
+  var to = moment().utc();
+}
+else {
+  var from = moment.utc(daterange.from);
+  var to = moment.utc(daterange.to);
+}
 
 if(to <= from)
   util.die('This daterange does not make sense.')

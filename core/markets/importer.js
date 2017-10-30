@@ -5,11 +5,18 @@ var dirs = util.dirs();
 var log = require(dirs.core + 'log');
 var moment = require('moment');
 var cp = require(dirs.core + 'cp');
+var juration = require('juration');
 
 var adapter = config[config.adapter];
 var daterange = config.importer.daterange;
 
-var from = moment.utc(daterange.from);
+if(_.isString(daterange)) {
+  var delta = juration.parse(daterange);
+  var from = moment().utc().subtract(delta, 'seconds');
+}
+else {
+  var from = moment.utc(daterange.from);
+}
 
 if(daterange.to) {
   var to = moment.utc(daterange.to);

@@ -427,6 +427,7 @@ config.mongodb = {
 // @link: https://gekko.wizb.it/docs/commandline/backtesting.html
 
 config.backtest = {
+  //daterange: '30 days',
   daterange: 'scan',
   batchSize: 50
 }
@@ -436,6 +437,7 @@ config.backtest = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 config.importer = {
+  //daterange: '30 days',
   daterange: {
     // NOTE: these dates are in UTC
     from: "2016-01-01 00:00:00"
