@@ -64,6 +64,7 @@ Market.prototype.get = function() {
     this.latestTs,
     future,
     'full',
+    null,
     this.processCandles
   )
 }

@@ -29,6 +29,10 @@ if(!from.isValid())
 if(!to.isValid())
   util.die('invalid `to`');
 
+// Internally we require that to and from align perfectly to minutes
+to = to.startOf('minute');
+from = from.startOf('minute');
+
 var Market = function() {
 
   _.bindAll(this);
@@ -47,7 +51,7 @@ var Market = function() {
   this.batchSize = config.backtest.batchSize;
   this.iterator = {
     from: from.clone(),
-    to: from.clone().add(this.batchSize, 'm').subtract(1, 's')
+    to: to.clone()
   }
 }
 
@@ -70,6 +74,7 @@ Market.prototype.get = function() {
     this.iterator.from.unix(),
     this.iterator.to.unix(),
     'full',
+    this.batchSize,
     this.processCandles
   )
 }
@@ -88,13 +93,17 @@ Market.prototype.processCandles = function(err, candles) {
     }
   }
 
-  if(!this.ended && amount < this.batchSize) {
-    var d = function(ts) {
-      return moment.unix(ts).utc().format('YYYY-MM-DD HH:mm:ss');
-    }
-    var from = d(_.first(candles).start);
-    var to = d(_.last(candles).start);
-    log.warn(`Simulation based on incomplete market data (${this.batchSize - amount} missing between ${from} and ${to}).`);
+  var d = function(ts) {
+    return moment.unix(ts).utc().format('YYYY-MM-DD HH:mm:ss');
+  }
+
+  var from = d(_.first(candles).start);
+  var to = d(_.last(candles).start);
+  var duration = momento.duration(to.diff(from)).asMinutes();
+
+  // Results are [from, to], not [from, to) typical with a range of time. So we +1 to account for the extra expected candle
+  if(!this.ended && amount < (duration + 1)) {
+    log.warn(`Simulation based on incomplete market data (${this.batchSize - amount} candles missing between.`);
   }
 
   _.each(candles, function(c, i) {
@@ -103,11 +112,7 @@ Market.prototype.processCandles = function(err, candles) {
   }, this);
 
   this.pushing = false;
-
-  this.iterator = {
-    from: this.iterator.from.clone().add(this.batchSize, 'm'),
-    to: this.iterator.from.clone().add(this.batchSize * 2, 'm').subtract(1, 's')
-  }
+  this.iterator.from = from.clone().add(1, 'm');
 
   if(!this.closed)
     this.get();

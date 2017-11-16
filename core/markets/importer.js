@@ -34,6 +34,10 @@ if(!from.isValid())
 if(!to.isValid())
   util.die('invalid `to`');
 
+// Internally we require that to and from align perfectly to minutes
+to = to.startOf('minute');
+from = from.startOf('minute');
+
 var TradeBatcher = require(dirs.budfox + 'tradeBatcher');
 var CandleManager = require(dirs.budfox + 'candleManager');
 var exchangeChecker = require(dirs.core + 'exchangeChecker');

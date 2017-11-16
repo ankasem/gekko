@@ -91,15 +91,21 @@ Reader.prototype.tableExists = function(name, next) {
   });
 }
 
-Reader.prototype.get = function(from, to, what, next) {
+Reader.prototype.get = function(from, to, limit, what, next) {
   if(what === 'full')
     what = '*';
 
-  this.db.all(`
+  var query = `
     SELECT ${what} from ${sqliteUtil.table('candles')}
     WHERE start <= ${to} AND start >= ${from}
     ORDER BY start ASC
-  `, function(err, rows) {
+  `;
+
+  if (limit != null) {
+    query = query + `LIMIT ${limit}`
+  }
+
+  this.db.all(query, function(err, rows) {
     if(err) {
       console.error(err);
       return util.die('DB error at `get`');

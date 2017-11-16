@@ -61,6 +61,7 @@ const getBatch = () => {
     iterator.from.unix(),
     iterator.to.unix(),
     'full',
+    batchSize,
     handleCandles
   )
 }
