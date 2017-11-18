@@ -60,8 +60,8 @@ const getBatch = () => {
   reader.get(
     iterator.from.unix(),
     iterator.to.unix(),
-    'full',
     batchSize,
+    'full',
     handleCandles
   )
 }

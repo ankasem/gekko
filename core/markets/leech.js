@@ -63,8 +63,8 @@ Market.prototype.get = function() {
   this.reader.get(
     this.latestTs,
     future,
-    'full',
     null,
+    'full',
     this.processCandles
   )
 }

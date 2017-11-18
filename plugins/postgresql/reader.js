@@ -100,16 +100,22 @@ Reader.prototype.tableExists = function (name, next) {
   });
 }
 
-Reader.prototype.get = function(from, to, what, next) {
+Reader.prototype.get = function(from, to, limit, what, next) {
   if(what === 'full'){
     what = '*';
   }
 
-  var query = this.db.query(new Query(`
+  var querySQL = `
   SELECT ${what} from ${postgresUtil.table('candles')}
   WHERE start <= ${to} AND start >= ${from}
   ORDER BY start ASC
-  `));
+  `;
+
+  if (limit != null) {
+    querySQL = querySQL + `LIMIT ${limit}`;
+  }
+
+  var query = this.db.query(new Query(querySQL));
 
   var rows = [];
   query.on('row', function(row) {

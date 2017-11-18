@@ -36,7 +36,7 @@ from = from.startOf('minute');
 var Market = function() {
 
   _.bindAll(this);
-  this.pushing = false;
+  this.result = false;
   this.ended = false;
   this.closed = false;
 
@@ -67,52 +67,60 @@ Market.prototype._read = _.once(function() {
 Market.prototype.get = function() {
   if(this.iterator.to >= to) {
     this.iterator.to = to;
-    this.ended = true;
   }
 
   this.reader.get(
     this.iterator.from.unix(),
     this.iterator.to.unix(),
-    'full',
     this.batchSize,
+    'full',
     this.processCandles
   )
 }
 
 Market.prototype.processCandles = function(err, candles) {
-  this.pushing = true;
   var amount = _.size(candles);
 
-  if(amount === 0) {
-    if(this.ended) {
+  if (amount === 0) {
+    if(this.result) {
+      if (!this.ended) {
+        var fromStr = this.iterator.from.format('YYYY-DD-MM HH:mm:ss');
+        var toStr = this.iterator.to.format('YYYY-MM-DD HH:mm:ss');
+        log.warn(`Market data missing from the end of the simulation, candles missing between ${fromStr} and ${toStr}.`);
+      } 
       this.closed = true;
       this.reader.close();
       this.emit('end');
     } else {
       util.die('Query returned no candles (do you have local data for the specified range?)');
     }
+
+    return; // Cannot keep proeccesing in this case
   }
 
+  this.result = true;
   var d = function(ts) {
-    return moment.unix(ts).utc().format('YYYY-MM-DD HH:mm:ss');
+    return moment.unix(ts).utc();
   }
 
-  var from = d(_.first(candles).start);
-  var to = d(_.last(candles).start);
-  var duration = momento.duration(to.diff(from)).asMinutes();
+  var fromMoment = this.iterator.from;
+  var toMoment = d(_.last(candles).start);
+  var duration = moment.duration(toMoment.diff(fromMoment)).asMinutes();
 
   // Results are [from, to], not [from, to) typical with a range of time. So we +1 to account for the extra expected candle
-  if(!this.ended && amount < (duration + 1)) {
-    log.warn(`Simulation based on incomplete market data (${this.batchSize - amount} candles missing between.`);
+  if(this.batchSize < (duration + 1)) {
+    var fromStr = fromMoment.format('YYYY-DD-MM HH:mm:ss');
+    var toStr = toMoment.format('YYYY-MM-DD HH:mm:ss');
+    log.warn(`Simulation based on incomplete market data (${this.batchSize - (duration + 1)} candles missing between ${fromStr} and ${toStr}.`);
   }
+  
+  this.iterator.from = toMoment.clone().add(1, 'm');
+  this.ended = this.iterator.from >= to;
 
   _.each(candles, function(c, i) {
     c.start = moment.unix(c.start);
     this.push(c);
   }, this);
-
-  this.pushing = false;
-  this.iterator.from = from.clone().add(1, 'm');
 
   if(!this.closed)
     this.get();

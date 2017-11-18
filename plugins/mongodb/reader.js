@@ -63,9 +63,9 @@ Reader.prototype.mostRecentWindow = function mostRecentWindow (from, to, next) {
   })
 }
 
-Reader.prototype.get = function get (from, to, what, next) { // returns all fields in general
+Reader.prototype.get = function get (from, to, limit, what, next) { // returns all fields in general
   // Find some documents
-  this.collection.find({ pair: this.pair, start: { $gte: from, $lte: to } }).sort({ start: 1 }, (err, docs) => {
+  this.collection.find({ pair: this.pair, start: { $gte: from, $lte: to } }).sort({ start: 1 }).limit(limit, (err, docs) => {
     if (err) {
       return util.die('DB error at `get`');
     }
