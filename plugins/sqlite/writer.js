@@ -53,6 +53,9 @@ Store.prototype.writeCandles = function() {
     return;
 
   var transaction = function() {
+    if (!this.cache.length)
+      return;
+      
     this.db.run("BEGIN TRANSACTION");
 
     var stmt = this.db.prepare(`
