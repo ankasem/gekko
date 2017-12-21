@@ -35,15 +35,7 @@ config.tradingAdvisor = {
   method: 'MACD',
   candleSize: 1,
   historySize: 3,
-  adapter: 'sqlite',
-  talib: {
-    enabled: false,
-    version: '1.0.2'
-  },
-  tulind: {
-    enabled: false,
-    version: '0.8.7'
-  }
+  adapter: 'sqlite'
 }
 
 // Exponential Moving Averages settings:
@@ -369,6 +361,14 @@ config.slack = {
   channel: '' // #tradebot
 }
 
+config.ifttt = {
+  enabled: false,
+  eventName: 'gekko',
+  makerKey: '',
+  muteSoft: true,
+  sendMessageOnStart: true
+}
+
 config.candleWriter = {
   enabled: false
 }
@@ -390,7 +390,7 @@ config.sqlite = {
   dataDirectory: 'history',
   version: 0.1,
 
-  journalMode: 'WAL', // setting this to 'DEL' may prevent db locking on windows
+  journalMode: require('./web/isWindows.js') ? 'DELETE' : 'WAL',
 
   dependencies: []
 }
@@ -440,7 +440,7 @@ config.importer = {
   //daterange: '30 days',
   daterange: {
     // NOTE: these dates are in UTC
-    from: "2016-01-01 00:00:00"
+    from: "2017-11-01 00:00:00"
   }
 }
 
