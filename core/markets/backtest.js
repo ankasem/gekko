@@ -84,7 +84,7 @@ Market.prototype.processCandles = function(err, candles) {
   if (amount === 0) {
     if(this.result) {
       if (!this.ended) {
-        var fromStr = this.iterator.from.format('YYYY-DD-MM HH:mm:ss');
+        var fromStr = this.iterator.from.format('YYYY-MM-DD HH:mm:ss');
         var toStr = this.iterator.to.format('YYYY-MM-DD HH:mm:ss');
         log.warn(`Market data missing from the end of the simulation, candles missing between ${fromStr} and ${toStr}.`);
       } 
