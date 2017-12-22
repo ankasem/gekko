@@ -1,10 +1,10 @@
-var Kraken = require('kraken-api-es5');
-var moment = require('moment');
-var _ = require('lodash');
+const Kraken = require('kraken-api-es5');
+const moment = require('moment');
+const _ = require('lodash');
 
-var util = require('../core/util');
-var Errors = require('../core/error');
-var log = require('../core/log');
+const util = require('../core/util');
+const Errors = require('../core/error');
+const log = require('../core/log');
 
 var crypto_currencies = [
   "XBT",

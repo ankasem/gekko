@@ -1,8 +1,8 @@
-var Bitfinex = require("bitfinex-api-node");
-var util = require('../../core/util.js');
-var _ = require('lodash');
-var moment = require('moment');
-var log = require('../../core/log');
+const Bitfinex = require("bitfinex-api-node");
+const util = require('../../core/util.js');
+const _ = require('lodash');
+const moment = require('moment');
+const log = require('../../core/log');
 
 var config = util.getConfig();
 
@@ -11,20 +11,8 @@ var dirs = util.dirs();
 var Fetcher = require(dirs.exchanges + 'bitfinex');
 
 Fetcher.prototype.getTrades = function(upto, callback, descending) {
-    var args = _.toArray(arguments);
-  
-    var path = 'trades/t' + this.pair + '/hist';
-    if (upto) {
-        path += '?limit=1000';
-        path += '&start=' + moment(upto).subtract(1, 'd').valueOf();
-        path += '&end=' + moment(upto).valueOf();
-    }
-  
-    log.debug('Querying trades with: ' + path);
-    this.bitfinex.makePublicRequest(path, (err, data) => {
-        if (err) {
-            return this.retry(this.getTrades, args);
-        }
+    let process = (err, data) => {
+        if (err) return callback(err);
 
         var trades = [];
         if (_.isArray(data)) {
@@ -39,7 +27,18 @@ Fetcher.prototype.getTrades = function(upto, callback, descending) {
         }
     
         callback(null, descending ? trades : trades.reverse());
-    });
+    };
+
+    let path = 'trades/t' + this.pair + '/hist';
+    if (upto) {
+        path += '?limit=1000';
+        path += '&start=' + moment(upto).subtract(1, 'd').valueOf();
+        path += '&end=' + moment(upto).valueOf();
+    }
+  
+    log.debug('Querying trades with: ' + path);
+    let handler = (cb) => this.bitfinex.makePublicRequest(path, this.handleResponse('getTrades', cb));
+    util.retryCustom(retryCritical, _.bind(handler, this), _.bind(process, this));
 }
 
 util.makeEventEmitter(Fetcher);
@@ -59,6 +58,13 @@ var batch_last = false;
 var fetcher = new Fetcher(config.watch);
 fetcher.bitfinex = new Bitfinex(null, null, { version: 2, transform: true }).rest;
 
+var retryCritical = {
+    retries: 10,
+    factor: 1.2,
+    minTimeout: 60 * 1000,
+    maxTimeout: 120 * 1000
+};
+
 var fetch = () => {
     fetcher.import = true;
 
@@ -66,7 +72,7 @@ var fetch = () => {
         // We need to slow this down to prevent hitting the rate limits
         setTimeout(() => {
             fetcher.getTrades(lastTimestamp, handleFetch);
-        }, 3500);
+        }, 1000);
     }
     else {
         lastTimestamp = from.valueOf();
@@ -76,7 +82,13 @@ var fetch = () => {
     }
 }
 
-var handleFetch = (unk, trades) => {
+var handleFetch = (err, trades) => {
+    if (err) {
+        log.error(`There was an error importing from Bitfinex ${err}`);
+        fetcher.emit('done');
+        return fetcher.emit('trades', []);
+    }
+        
     trades = _.filter(
         trades,
         t => !lastId || (t.tid < lastId)

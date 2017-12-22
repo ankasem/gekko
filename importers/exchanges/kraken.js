@@ -34,7 +34,13 @@ var fetch = () => {
         fetcher.getTrades(from, handleFetch);
 }
 
-var handleFetch = (unk, trades) => {
+var handleFetch = (err, trades) => {
+    if (err) {
+        log.error(`There was an error importing from Bitfinex ${err}`);
+        fetcher.emit('done');
+        return fetcher.emit('trades', []);
+    }
+
     var last = moment.unix(_.last(trades).date);
     lastId = _.last(trades).tid
 
