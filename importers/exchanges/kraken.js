@@ -36,7 +36,7 @@ var fetch = () => {
 
 var handleFetch = (err, trades) => {
     if (err) {
-        log.error(`There was an error importing from Bitfinex ${err}`);
+        log.error(`There was an error importing from Kraken ${err}`);
         fetcher.emit('done');
         return fetcher.emit('trades', []);
     }
