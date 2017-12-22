@@ -33,7 +33,7 @@ var retryForever = {
   forever: true,
   factor: 1.2,
   minTimeout: 10,
-  maxTimeout: 120
+  maxTimeout: 300
 };
 
 // Probably we need to update these string
