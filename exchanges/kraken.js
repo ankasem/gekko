@@ -415,7 +415,6 @@ Trader.getCapabilities = function () {
       { pair: ['XBT', 'ZEC'], minimalOrder: { amount: 0.01, unit: 'asset' }, precision: 5 },
 
       //Tradeable against XBT
-      { pair: ['BCH', 'XBT'], minimalOrder: { amount: 0.01, unit: 'asset' }, precision: 5 },
       { pair: ['CAD', 'XBT'], minimalOrder: { amount: 0.1, unit: 'asset' }, precision: 1 },
       { pair: ['EUR', 'XBT'], minimalOrder: { amount: 0.1, unit: 'asset' }, precision: 1 },
       { pair: ['GBP', 'XBT'], minimalOrder: { amount: 0.01, unit: 'asset' } },
