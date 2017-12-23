@@ -32,8 +32,8 @@ var retryCritical = {
 var retryForever = {
   forever: true,
   factor: 1.2,
-  minTimeout: 10,
-  maxTimeout: 300
+  minTimeout: 10 * 1000,
+  maxTimeout: 300 * 1000
 };
 
 // Probably we need to update these string
