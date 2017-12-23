@@ -28,7 +28,9 @@ var fetch = () => {
 
     if (lastId) {
         var tidAsTimestamp = lastId / 1000000;
-        fetcher.getTrades(tidAsTimestamp, handleFetch);
+        setTimeout(() => {
+            fetcher.getTrades(tidAsTimestamp, handleFetch)
+        }, 500);
     }
     else
         fetcher.getTrades(from, handleFetch);
