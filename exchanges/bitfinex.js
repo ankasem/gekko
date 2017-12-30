@@ -37,7 +37,7 @@ var retryForever = {
 };
 
 // Probably we need to update these string
-var recoverableErrors = new RegExp(/(SOCKETTIMEDOUT|TIMEDOUT|CONNRESET|CONNREFUSED|NOTFOUND|StatusCodeError: 429|StatusCodeError: 525|StatusCodeError: 520|StatusCodeError: 504|StatusCodeError: 502)/)
+var recoverableErrors = new RegExp(/(SOCKETTIMEDOUT|TIMEDOUT|CONNRESET|CONNREFUSED|NOTFOUND|StatusCodeError: 429|StatusCodeError: 5)/)
 
 Trader.prototype.processError = function(funcName, error) {
   if (!error) return undefined;
